@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController Instance { get; private set; }
+
     [Header("Movement")]
     public float moveSpeed = 5f;
 
@@ -21,7 +23,15 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
         playerAnimation = GetComponent<PlayerAnimation>();
+        UpdateCooldownUI();
     }
 
     private void Update()
@@ -39,8 +49,10 @@ public class PlayerController : MonoBehaviour
         // Cập nhật cooldown bắn
         if (shootCooldownTimer > 0f)
         {
-            shootCooldownTimer -= Time.deltaTime;
+            shootCooldownTimer = Mathf.Max(0f, shootCooldownTimer - Time.deltaTime);
         }
+
+        UpdateCooldownUI();
 
         // Lấy input từ InputManager (Input System mới)
         Vector2 moveInput = Vector2.zero;
@@ -80,15 +92,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleShootInput()
     {
-        // Kiểm tra phím bắn (Space hoặc phím được chỉ định)
-        bool shootPressed = Keyboard.current != null && 
-                           (Keyboard.current[shootKey].wasPressedThisFrame || 
-                            Keyboard.current[Key.Space].wasPressedThisFrame);
-
-        // Hoặc click chuột trái
-        bool mouseShoot = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
-
-        if (shootPressed || mouseShoot)
+        if (InputManager.Instance.IsShooting())
         {
             Shoot();
         }
@@ -109,7 +113,19 @@ public class PlayerController : MonoBehaviour
             playerAnimation.SetShoot();
         }
 
+        UpdateCooldownUI();
+
         // TODO: Thêm logic bắn đạn ở đây
         // Ví dụ: Instantiate bullet, raycast, v.v.
+    }
+
+    private void UpdateCooldownUI()
+    {
+        if (UIManager.Instance == null || UIManager.Instance.gamePlayPanel == null)
+        {
+            return;
+        }
+
+        UIManager.Instance.gamePlayPanel.SetCountDown(shootCooldownTimer, shootCooldown);
     }
 }
