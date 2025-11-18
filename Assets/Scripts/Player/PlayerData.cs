@@ -6,6 +6,12 @@ public class PlayerData
 {
     public List<PlayerLevelData> levels = new List<PlayerLevelData>();
     public List<QuestStatus> quests = new List<QuestStatus>();
+    public int health;
+
+    public int damage;
+
+    public int speed;
+    public int totalReward = 0;
 
     public static PlayerData CreateDefault(int totalLevels)
     {
@@ -22,6 +28,10 @@ public class PlayerData
         data.quests.Add(new QuestStatus { questId = "Quest 1", completed = false });
         data.quests.Add(new QuestStatus { questId = "Quest 2", completed = false });
         data.quests.Add(new QuestStatus { questId = "Quest 3", completed = false });
+        data.totalReward = 0;
+        data.health = 100;
+        data.damage = 10;
+        data.speed = 10;
 
         return data;
     }

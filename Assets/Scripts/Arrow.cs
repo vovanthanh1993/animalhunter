@@ -52,7 +52,20 @@ public class Arrow : MonoBehaviour
 
     void Start()
     {
+        // Lấy damage từ PlayerData
+        LoadDamageFromPlayerData();
         Destroy(gameObject, lifeTime);
+    }
+
+    /// <summary>
+    /// Load damage từ PlayerData và gán vào damage của arrow
+    /// </summary>
+    void LoadDamageFromPlayerData()
+    {
+        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.playerData != null)
+        {
+            damage = PlayerDataManager.Instance.playerData.damage;
+        }
     }
 
     void OnTriggerEnter(Collider other)

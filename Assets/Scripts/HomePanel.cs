@@ -1,22 +1,104 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 public class HomePanel : MonoBehaviour
 {
-    public Button settingButton;
+    public Button upgradeBtn;
+    public Button playBtn;
+    public TextMeshProUGUI meatText;
+    public TextMeshProUGUI healthText;
+    public TextMeshProUGUI damageText;
+    public TextMeshProUGUI speedText;
 
     void Start()
     {
-        settingButton.onClick.AddListener(OpenSetting); 
+        upgradeBtn.onClick.AddListener(OnUpgradeButtonClicked); 
+        playBtn.onClick.AddListener(OnPlayButtonClicked);
+        UpdateRewardDisplay();
+        UpdateHealthDisplay();
+        UpdateDamageDisplay();
+        UpdateSpeedDisplay();
     }
 
-    void OpenSetting()
+    void OnUpgradeButtonClicked()
     {
-        GameCommonUtils.LoadScene("Setting");
+        //UIManager.Instance.ShowSettingPanel(true);
     }
 
-    void ExitGame()
+    void OnPlayButtonClicked()
     {
-        Application.Quit();
+        UIManager.Instance.ShowSelectLevelPanel(true);
+    }
+
+    private void OnEnable() {
+        UIManager.Instance.ShowGamePlayPanel(false);
+        UpdateRewardDisplay();
+        UpdateHealthDisplay();
+        UpdateDamageDisplay();
+        UpdateSpeedDisplay();
+    }
+
+    /// <summary>
+    /// Cập nhật hiển thị reward từ PlayerData
+    /// </summary>
+    public void UpdateRewardDisplay()
+    {
+        if (meatText != null)
+        {
+            if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.playerData != null)
+            {
+                meatText.text = PlayerDataManager.Instance.playerData.totalReward.ToString();
+            }
+            else
+            {
+                meatText.text = "0";
+            }
+        }
+    }
+
+    public void UpdateHealthDisplay()
+    {
+        if (healthText != null)
+        {
+            if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.playerData != null)
+            {
+                healthText.text = PlayerDataManager.Instance.playerData.health.ToString();
+            }
+            else
+            {
+                healthText.text = "0";
+            }
+        }
+    }
+
+    public void UpdateDamageDisplay()
+    {
+        if (damageText != null)
+        {
+            if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.playerData != null)
+            {
+                damageText.text = PlayerDataManager.Instance.playerData.damage.ToString();
+            }
+            else
+            {
+                damageText.text = "0";
+            }
+        }
+    }
+
+    public void UpdateSpeedDisplay()
+    {
+        if (speedText != null)
+        {
+            if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.playerData != null)
+            {
+                speedText.text = PlayerDataManager.Instance.playerData.speed.ToString();
+            }
+            else
+            {
+                speedText.text = "0";
+            }
+        }
     }
 }

@@ -2519,6 +2519,7 @@ MonoBehaviour:
   currentHealth: 0
   runDuration: 1
   dieDelay: 1
+  enemyId: deer
 --- !u!114 &5619661556828473860
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2571,6 +2572,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runSpeed: 5
   runDistance: 8
+  detectionDistance: 3
+  checkInterval: 0.1
 --- !u!1 &8769110197511400936
 GameObject:
   m_ObjectHideFlags: 0

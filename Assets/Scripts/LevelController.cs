@@ -36,10 +36,22 @@ public class LevelController : MonoBehaviour
 
     private void LoadPlayerData()
     {
-        playerData = PlayerDataStorage.LoadOrCreateDefault(totalLevels);
-        if (playerData != null && playerData.levels != null && playerData.levels.Count > 0)
+        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.playerData != null)
         {
-            totalLevels = playerData.levels.Count;
+            playerData = PlayerDataManager.Instance.playerData;
+            if (playerData.levels != null && playerData.levels.Count > 0)
+            {
+                totalLevels = playerData.levels.Count;
+            }
+        }
+        else
+        {
+            // Fallback nếu PlayerDataManager chưa được khởi tạo
+            playerData = PlayerDataStorage.LoadOrCreateDefault(totalLevels);
+            if (playerData != null && playerData.levels != null && playerData.levels.Count > 0)
+            {
+                totalLevels = playerData.levels.Count;
+            }
         }
     }
 

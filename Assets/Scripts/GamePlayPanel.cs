@@ -6,6 +6,8 @@ public class GamePlayPanel : MonoBehaviour
 {
     public TextMeshProUGUI countDownText;
     public Image countDownImage;
+    public GameObject winPanel;
+    public GameObject losePanel;
 
     public void SetCountDown(float remainingTime, float maxTime)
     {
@@ -38,5 +40,24 @@ public class GamePlayPanel : MonoBehaviour
         {
             countDownImage.fillAmount = 0f;
         }
+
+        if (winPanel != null)
+        {
+            winPanel.SetActive(false);
+        }
+
+        if (losePanel != null)
+        {
+            losePanel.SetActive(false);
+        }
+    }
+
+    public void ShowWinPanel(bool isShow, int star, int reward){
+        winPanel.SetActive(isShow);
+        winPanel.GetComponent<WinPanel>().Init(star, reward);
+    }
+
+    public void ShowLosePanel(bool isShow){
+        losePanel.SetActive(isShow);
     }
 }

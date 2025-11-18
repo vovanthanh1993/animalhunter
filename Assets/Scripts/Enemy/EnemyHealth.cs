@@ -18,6 +18,8 @@ public class EnemyHealth : MonoBehaviour
     private Coroutine runCoroutine;
     private bool isDead = false;
 
+    public string enemyId;
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -102,5 +104,6 @@ public class EnemyHealth : MonoBehaviour
     {
         yield return new WaitForSeconds(dieDelay);
         Destroy(gameObject);
+        QuestManager.Instance.OnEnemyKilled(enemyId);
     }
 }
