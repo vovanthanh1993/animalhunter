@@ -23,6 +23,10 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Vị trí spawn arrow (Transform con của player, nếu null sẽ dùng vị trí player)")]
     public Transform arrowSpawnPoint;
 
+    [Header("Input Control")]
+    [Tooltip("Cho phép nhận input từ người chơi hay không")]
+    public bool canReceiveInput = true;
+
     private PlayerAnimation playerAnimation;
     private bool isShooting = false;
     private float shootStopTimer = 0f;
@@ -74,6 +78,17 @@ public class PlayerController : MonoBehaviour
         }
 
         UpdateCooldownUI();
+
+        // Kiểm tra xem có cho phép nhận input không
+        if (!canReceiveInput)
+        {
+            // Nếu không cho phép input, dừng animation
+            if (playerAnimation != null)
+            {
+                playerAnimation.SetMovement(false, 0f);
+            }
+            return;
+        }
 
         // Lấy input từ InputManager (Input System mới)
         Vector2 moveInput = Vector2.zero;
