@@ -15,11 +15,19 @@ public class PlayerController : MonoBehaviour
     public float shootStopDuration = 0.5f;
     [Tooltip("Thời gian hồi chiêu bắn (giây)")]
     public float shootCooldown = 2f;
+    
+    [Header("Arrow")]
+    [Tooltip("Arrow prefab để spawn khi bắn")]
+    public GameObject arrowPrefab;
+    
+    [Tooltip("Vị trí spawn arrow (Transform con của player, nếu null sẽ dùng vị trí player)")]
+    public Transform arrowSpawnPoint;
 
     private PlayerAnimation playerAnimation;
     private bool isShooting = false;
     private float shootStopTimer = 0f;
     private float shootCooldownTimer = 0f;
+    private CharacterController characterController;
 
     private void Awake()
     {
@@ -31,6 +39,14 @@ public class PlayerController : MonoBehaviour
 
         Instance = this;
         playerAnimation = GetComponent<PlayerAnimation>();
+        characterController = GetComponent<CharacterController>();
+        
+        // Đảm bảo CharacterController tồn tại
+        if (characterController == null)
+        {
+            Debug.LogError("PlayerController: CharacterController component is missing! Please add CharacterController to the player GameObject.");
+        }
+        
         UpdateCooldownUI();
     }
 
@@ -68,13 +84,20 @@ public class PlayerController : MonoBehaviour
         float speed = moveInput.magnitude;
 
         // Chỉ cho phép di chuyển nếu không đang bắn
-        if (isMoving && !isShooting)
+        if (isMoving && !isShooting && characterController != null)
         {
-            // Di chuyển trên mặt phẳng XZ (top-down)
-            transform.position += direction * moveSpeed * Time.deltaTime;
+            // Tính toán hướng di chuyển
+            Vector3 moveDirection = direction * moveSpeed;
+            
+            // CharacterController tự động xử lý collision
+            // Move() sẽ không di chuyển nếu có vật cản
+            characterController.Move(moveDirection * Time.deltaTime);
 
             // Quay nhân vật theo hướng di chuyển
-            transform.forward = direction;
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                transform.forward = direction;
+            }
         }
 
         // Gọi PlayerAnimation để cập nhật animation
@@ -115,8 +138,49 @@ public class PlayerController : MonoBehaviour
 
         UpdateCooldownUI();
 
-        // TODO: Thêm logic bắn đạn ở đây
-        // Ví dụ: Instantiate bullet, raycast, v.v.
+        // Spawn arrow
+        SpawnArrow();
+    }
+
+    private void SpawnArrow()
+    {
+        if (arrowPrefab == null)
+        {
+            Debug.LogWarning("PlayerController: Arrow prefab is not assigned!");
+            return;
+        }
+
+        // Xác định vị trí spawn arrow
+        Vector3 spawnPosition;
+        if (arrowSpawnPoint != null)
+        {
+            spawnPosition = arrowSpawnPoint.position;
+        }
+        else
+        {
+            // Spawn ở phía trước player
+            spawnPosition = transform.position + transform.forward * 1f + Vector3.up * 1f;
+        }
+
+        // Lấy hướng bắn từ transform.forward của player (hướng player đang nhìn)
+        Vector3 shootDirection3D = transform.forward;
+        
+        // Chuyển đổi từ Vector3 sang Vector2 (x, z) cho top-down game
+        Vector2 shootDirection = new Vector2(shootDirection3D.x, shootDirection3D.z);
+
+        // Tạo arrow
+        GameObject arrow = Instantiate(arrowPrefab, spawnPosition, Quaternion.identity);
+
+        // Gửi hướng cho mũi tên (arrow sẽ tự quay trong SetDirection)
+        Arrow arrowComponent = arrow.GetComponent<Arrow>();
+        if (arrowComponent != null)
+        {
+            arrowComponent.SetDirection(shootDirection);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerController: Arrow prefab doesn't have Arrow component!");
+        }
     }
 
     private void UpdateCooldownUI()
