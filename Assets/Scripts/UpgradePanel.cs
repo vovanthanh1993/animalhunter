@@ -7,9 +7,9 @@ public class UpgradePanel : MonoBehaviour
     public Button damageBtn;
     public Button speedBtn;
 
-    public int healthAddValue;
-    public int damageAddValue;
-    public int speedAddValue;
+    public int healthAddValue = 5;
+    public int damageAddValue = 5;
+    public int speedAddValue = 2;
 
     public int healthPrice;
     public int damagePrice;
@@ -18,6 +18,10 @@ public class UpgradePanel : MonoBehaviour
     public TextMeshProUGUI healthPriceText;
     public TextMeshProUGUI damagePriceText;
     public TextMeshProUGUI speedPriceText;
+
+    public TextMeshProUGUI healthValueText;
+    public TextMeshProUGUI damageValueText;
+    public TextMeshProUGUI speedValueText;
 
     void Start()
     {
@@ -44,6 +48,18 @@ public class UpgradePanel : MonoBehaviour
         if (speedPriceText != null)
         {
             speedPriceText.text = speedPrice.ToString();
+        }
+        if(healthAddValue != 0)
+        {
+            healthValueText.text = "+ " + healthAddValue.ToString() + " health";
+        }
+        if(damageAddValue != 0)
+        {
+            damageValueText.text = "+ " + damageAddValue.ToString() + " damage";
+        }
+        if(speedAddValue != 0)
+        {
+            speedValueText.text = "+ " + speedAddValue.ToString() + " speed";
         }
     }
 

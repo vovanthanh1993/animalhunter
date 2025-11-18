@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
     public static PlayerController Instance { get; private set; }
 
     [Header("Movement")]
-    public float moveSpeed = 5f;
+    public float moveSpeed = 3f;
 
     [Header("Shoot")]
     [Tooltip("Phím bắn (mặc định: Space hoặc Click chuột trái)")]
@@ -48,6 +48,11 @@ public class PlayerController : MonoBehaviour
         }
         
         UpdateCooldownUI();
+    }
+
+    void Start()
+    {
+        moveSpeed = PlayerDataManager.Instance.playerData.speed/10;
     }
 
     private void Update()

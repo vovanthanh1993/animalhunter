@@ -30,8 +30,8 @@ public class PlayerData
         data.quests.Add(new QuestStatus { questId = "Quest 3", completed = false });
         data.totalReward = 0;
         data.health = 100;
-        data.damage = 10;
-        data.speed = 10;
+        data.damage = 30;
+        data.speed = 30;
 
         return data;
     }

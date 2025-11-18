@@ -4181,7 +4181,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &531247340
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6826,13 +6826,16 @@ MonoBehaviour:
   speedBtn: {fileID: 265788249}
   healthAddValue: 5
   damageAddValue: 5
-  speedAddValue: 5
+  speedAddValue: 2
   healthPrice: 125
   damagePrice: 100
   speedPrice: 100
   healthPriceText: {fileID: 1146697470}
   damagePriceText: {fileID: 2095758598}
   speedPriceText: {fileID: 62916172}
+  healthValueText: {fileID: 2143184662}
+  damageValueText: {fileID: 812479849}
+  speedValueText: {fileID: 709949214}
 --- !u!1 &863559524
 GameObject:
   m_ObjectHideFlags: 0
@@ -12528,7 +12531,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1685843855
 RectTransform:
   m_ObjectHideFlags: 0
