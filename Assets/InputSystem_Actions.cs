@@ -330,7 +330,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""d2a557cf-23cd-47b0-a0b0-e53652667ac5"",
+                    ""id"": ""d478d20e-ff04-4f77-8424-83a1185a9986"",
                     ""path"": ""<Pointer>/delta"",
                     ""interactions"": """",
                     ""processors"": """",

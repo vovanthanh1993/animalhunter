@@ -5,48 +5,49 @@ public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance { get; private set; }
 
-    [Header("Movement")]
-    public float moveSpeed = 3f;
-
+    [Header("Movement Settings")]
+    [SerializeField] private CharacterController characterController;
+    [SerializeField] private GameObject model;
+    [SerializeField] private float moveSpeed = 3f;
+    
+    [Header("Look Rotation Settings")]
+    [SerializeField] private float maxPitch = 60f;
+    [SerializeField] private float minPitch = -45f;
+    [SerializeField] private float lookSensitivity = 0.15f;
+    
+    [Header("Camera Settings")]
+    [SerializeField] private Transform camTarget;
+    
     [Header("Shoot")]
-    [Tooltip("Phím bắn (mặc định: Space hoặc Click chuột trái)")]
-    public Key shootKey = Key.Space;
     [Tooltip("Thời gian nhân vật dừng lại khi bắn (giây)")]
-    public float shootStopDuration = 0.5f;
+    [SerializeField] private float shootStopDuration = 0.5f;
     [Tooltip("Thời gian hồi chiêu bắn (giây)")]
-    public float shootCooldown = 2f;
+    [SerializeField] private float shootCooldown = 2f;
     
     [Header("Arrow")]
     [Tooltip("Arrow prefab để spawn khi bắn")]
-    public GameObject arrowPrefab;
-    
+    [SerializeField] private GameObject arrowPrefab;
     [Tooltip("Vị trí spawn arrow (Transform con của player, nếu null sẽ dùng vị trí player)")]
-    public Transform arrowSpawnPoint;
+    [SerializeField] private Transform arrowSpawnPoint;
     [Tooltip("Khoảng cách ray để tìm mục tiêu từ camera")]
-    public float cameraAimRayDistance = 300f;
+    [SerializeField] private float cameraAimRayDistance = 300f;
     [Tooltip("Layer mask cho ray aim (mặc định: tất cả)")]
-    public LayerMask cameraAimLayerMask = ~0;
+    [SerializeField] private LayerMask cameraAimLayerMask = ~0;
 
     [Header("Input Control")]
     [Tooltip("Cho phép nhận input từ người chơi hay không")]
-    public bool canReceiveInput = true;
+    [SerializeField] private bool canReceiveInput = true;
+    [SerializeField] private bool isDisable = false;
 
-    [Header("Camera Alignment")]
-    [Tooltip("Tự động xoay nhân vật theo hướng camera/Look input")]
-    public bool alignWithLookInput = true;
-    [Tooltip("Tốc độ xoay nhân vật (Slerp)")]
-    public float lookRotationSpeed = 20f;
-    [Tooltip("Ngưỡng look input để kích hoạt xoay")]
-    public float lookInputThreshold = 0.05f;
-    [Tooltip("Transform của camera dùng làm tham chiếu (nếu bỏ trống sẽ tìm Camera.main)")]
-    public Transform cameraTransform;
-
+    // Look rotation
+    private Vector2 lookRotation = Vector2.zero;
+    
+    // Components
     private PlayerAnimation playerAnimation;
     private bool isShooting = false;
     private float shootStopTimer = 0f;
     private float shootCooldownTimer = 0f;
-    private CharacterController characterController;
-    private Vector3 lastMoveDirection = Vector3.zero;
+    private CameraController cameraController;
 
     private void Awake()
     {
@@ -57,50 +58,37 @@ public class PlayerController : MonoBehaviour
         }
 
         Instance = this;
+        
+        // Get components
+        if (characterController == null)
+            characterController = GetComponent<CharacterController>();
+        
         playerAnimation = GetComponent<PlayerAnimation>();
-        characterController = GetComponent<CharacterController>();
         
         // Đảm bảo CharacterController tồn tại
         if (characterController == null)
         {
             Debug.LogError("PlayerController: CharacterController component is missing! Please add CharacterController to the player GameObject.");
         }
+    }
+
+    private void Start()
+    {
+        // Load move speed from PlayerDataManager if available
+        if (PlayerDataManager.Instance != null)
+        {
+            moveSpeed = PlayerDataManager.Instance.playerData.speed / 10f;
+        }
+        
+        // Setup camera
+        SetupCamera();
         
         UpdateCooldownUI();
     }
 
-    void Start()
-    {
-        moveSpeed = PlayerDataManager.Instance.playerData.speed/10;
-
-        if (cameraTransform == null && Camera.main != null)
-        {
-            cameraTransform = Camera.main.transform;
-        }
-    }
-
     private void Update()
     {
-        // Cập nhật timer bắn
-        if (isShooting)
-        {
-            shootStopTimer -= Time.deltaTime;
-            if (shootStopTimer <= 0f)
-            {
-                isShooting = false;
-            }
-        }
-
-        // Cập nhật cooldown bắn
-        if (shootCooldownTimer > 0f)
-        {
-            shootCooldownTimer = Mathf.Max(0f, shootCooldownTimer - Time.deltaTime);
-        }
-
-        UpdateCooldownUI();
-
-        // Kiểm tra xem có cho phép nhận input không
-        if (!canReceiveInput)
+        if (isDisable || !canReceiveInput)
         {
             // Nếu không cho phép input, dừng animation
             if (playerAnimation != null)
@@ -110,137 +98,62 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        HandleMovement();
+        HandleInput();
+    }
 
-        // Xử lý input bắn (chỉ cho phép bắn khi không đang bắn và cooldown đã hết)
-        if (!isShooting && shootCooldownTimer <= 0f)
+    private void LateUpdate()
+    {
+        if (!isDisable)
         {
-            HandleShootInput();
+            UpdateCameraTarget();
         }
     }
 
-    private void HandleShootInput()
-    {
-        if (InputManager.Instance.IsShooting())
-        {
-            Shoot();
-        }
-    }
+    #region Initialization
 
-    private void Shoot()
+    private void SetupCamera()
     {
-        // Đặt trạng thái đang bắn và timer
-        isShooting = true;
-        shootStopTimer = shootStopDuration;
+        if (isDisable) return;
         
-        // Reset cooldown timer về 2 giây
-        shootCooldownTimer = shootCooldown;
-
-        // Gọi PlayerAnimation để trigger animation bắn
-        if (playerAnimation != null)
+        if (camTarget != null)
         {
-            playerAnimation.SetShoot();
+            camTarget.gameObject.SetActive(true);
         }
-
-        UpdateCooldownUI();
-
-        // Spawn arrow
-        Vector3 shootDirection = SpawnArrow();
+        
+        // Tìm CameraController
+        cameraController = FindObjectOfType<CameraController>();
+        if (cameraController != null && camTarget != null)
+        {
+            cameraController.SetTarget(camTarget);
+        }
     }
 
-    private Vector3 SpawnArrow()
+    #endregion
+
+    #region Input Handling
+
+    private void HandleInput()
     {
-        if (arrowPrefab == null)
-        {
-            Debug.LogWarning("PlayerController: Arrow prefab is not assigned!");
-            return transform.forward;
-        }
+        if (InputManager.Instance == null) return;
 
-        // Xác định vị trí spawn arrow
-        Vector3 spawnPosition = arrowSpawnPoint != null ? arrowSpawnPoint.position : transform.position;
-
-        Vector3 shootDirection3D = CalculateShootDirection(spawnPosition);
-
-        // Tạo arrow
-        GameObject arrow = Instantiate(arrowPrefab, spawnPosition, Quaternion.identity);
-
-        // Gửi hướng cho mũi tên (arrow sẽ tự quay trong SetDirection)
-        Arrow arrowComponent = arrow.GetComponent<Arrow>();
-        if (arrowComponent != null)
-        {
-            arrowComponent.SetDirection(shootDirection3D);
-        }
-        else
-        {
-            Debug.LogWarning("PlayerController: Arrow prefab doesn't have Arrow component!");
-        }
-
-        return shootDirection3D;
+        HandleLookRotation();
+        HandleMovement();
+        HandleShootInput();
     }
 
-    private void UpdateCooldownUI()
+    private void HandleLookRotation()
     {
-        if (UIManager.Instance == null || UIManager.Instance.gamePlayPanel == null)
-        {
-            return;
-        }
+        if (InputManager.Instance == null) return;
 
-        UIManager.Instance.gamePlayPanel.SetCountDown(shootCooldownTimer, shootCooldown);
-    }
-
-    private void AlignWithLookInput(bool isMoving, Vector3 moveDirection)
-    {
-        if (InputManager.Instance == null)
-        {
-            return;
-        }
-
-        Vector2 lookInput = InputManager.Instance.InputLookVector();
-        bool hasLookInput = lookInput.sqrMagnitude > lookInputThreshold * lookInputThreshold;
-
-        Vector3 targetForward;
-
-        if (hasLookInput && cameraTransform != null)
-        {
-            targetForward = cameraTransform.forward;
-            targetForward.y = 0f;
-        }
-        else if (isMoving && moveDirection.sqrMagnitude > 0.0001f)
-        {
-            targetForward = moveDirection;
-        }
-        else
-        {
-            return;
-        }
-
-        if (targetForward.sqrMagnitude < 0.0001f)
-        {
-            return;
-        }
-
-        Quaternion targetRotation = Quaternion.LookRotation(targetForward.normalized);
-        transform.rotation = Quaternion.RotateTowards(
-            transform.rotation,
-            targetRotation,
-            lookRotationSpeed * Time.deltaTime);
-    }
-
-    private Vector3 CalculateShootDirection(Vector3 spawnPosition)
-    {
-        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
-        Vector3 targetPoint;
-
-        if (Physics.Raycast(ray, out RaycastHit hit, cameraAimRayDistance))
-        {
-            targetPoint = hit.point;   // điểm trúng
-        }
-        else
-        {
-            targetPoint = ray.GetPoint(cameraAimRayDistance); // nếu không trúng gì
-        }
-
-        return (targetPoint - spawnPosition).normalized;
+        Vector2 lookDelta = InputManager.Instance.InputLookVector();
+        
+        // Thêm look rotation với giới hạn pitch (đảo ngược dấu của pitch để kéo lên = nhìn lên)
+        lookRotation.x -= lookDelta.y * lookSensitivity;
+        lookRotation.x = Mathf.Clamp(lookRotation.x, minPitch, maxPitch);
+        lookRotation.y += lookDelta.x * lookSensitivity;
+        
+        // Xoay player theo yaw (chỉ xoay trục Y)
+        transform.rotation = Quaternion.Euler(0f, lookRotation.y, 0f);
     }
 
     private void HandleMovement()
@@ -261,44 +174,246 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector2 moveInput = InputManager.Instance.InputMoveVector();
-        Vector3 inputDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-        bool hasInput = inputDirection.magnitude >= 0.1f;
-
-        if (hasInput)
+        
+        if (moveInput.magnitude < 0.1f)
         {
-            float referenceY = cameraTransform != null
-                ? cameraTransform.eulerAngles.y
-                : transform.eulerAngles.y;
-
-            float targetAngle = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + referenceY;
-            float smoothedAngle = Mathf.LerpAngle(
-                transform.eulerAngles.y,
-                targetAngle,
-                lookRotationSpeed * Time.deltaTime);
-
-            transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
-
-            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-            lastMoveDirection = moveDir;
-
-            Vector3 velocity = moveDir * moveSpeed + Physics.gravity;
-            characterController.Move(velocity * Time.deltaTime);
-
-            if (playerAnimation != null)
-            {
-                float normalizedSpeed = Mathf.Clamp01(moveInput.magnitude);
-                playerAnimation.SetMovement(true, normalizedSpeed);
-            }
-        }
-        else
-        {
+            // Không có input - chỉ áp dụng gravity
             characterController.Move(Physics.gravity * Time.deltaTime);
-
+            
             if (playerAnimation != null)
             {
                 playerAnimation.SetMovement(false, 0f);
             }
+            return;
+        }
+
+        // Tính toán hướng di chuyển tương đối với camera rotation
+        Vector3 worldDirection = GetWorldDirection(moveInput);
+        
+        // Di chuyển player
+        Vector3 velocity = worldDirection * moveSpeed + Physics.gravity;
+        characterController.Move(velocity * Time.deltaTime);
+
+        // Cập nhật animation
+        if (playerAnimation != null)
+        {
+            float moveSpeedValue = moveInput.magnitude;
+            playerAnimation.SetMovement(true, moveSpeedValue);
         }
     }
 
+    /// <summary>
+    /// Chuyển đổi input direction sang world direction dựa trên camera rotation
+    /// </summary>
+    private Vector3 GetWorldDirection(Vector2 inputDirection)
+    {
+        // Lấy rotation từ camera hoặc từ player rotation
+        Quaternion rotation = Quaternion.identity;
+        
+        if (Camera.main != null)
+        {
+            // Dùng camera yaw để tính hướng di chuyển
+            float cameraYaw = Camera.main.transform.eulerAngles.y;
+            rotation = Quaternion.Euler(0f, cameraYaw, 0f);
+        }
+        else
+        {
+            // Nếu không có camera, dùng player rotation
+            rotation = transform.rotation;
+        }
+        
+        // Chuyển đổi input direction sang world direction
+        Vector3 direction = new Vector3(inputDirection.x, 0f, inputDirection.y);
+        return rotation * direction;
+    }
+
+    private void HandleShootInput()
+    {
+        if (isShooting || shootCooldownTimer > 0f) return;
+        
+        if (InputManager.Instance.IsShooting())
+        {
+            Shoot();
+        }
+    }
+
+    #endregion
+
+    #region Combat
+
+    private void Shoot()
+    {
+        // Đặt trạng thái đang bắn và timer
+        isShooting = true;
+        shootStopTimer = shootStopDuration;
+        shootCooldownTimer = shootCooldown;
+
+        // Gọi PlayerAnimation để trigger animation bắn
+        if (playerAnimation != null)
+        {
+            playerAnimation.SetShoot();
+        }
+
+        UpdateCooldownUI();
+
+        // Spawn arrow
+        SpawnArrow();
+    }
+
+    private void SpawnArrow()
+    {
+        if (arrowPrefab == null)
+        {
+            Debug.LogWarning("PlayerController: Arrow prefab is not assigned!");
+            return;
+        }
+
+        // Xác định vị trí spawn arrow
+        Vector3 spawnPosition = arrowSpawnPoint != null ? arrowSpawnPoint.position : transform.position;
+
+        Vector3 shootDirection = CalculateShootDirection(spawnPosition);
+
+        // Tạo arrow
+        GameObject arrow = Instantiate(arrowPrefab, spawnPosition, Quaternion.identity);
+
+        // Gửi hướng cho mũi tên (arrow sẽ tự quay trong SetDirection)
+        Arrow arrowComponent = arrow.GetComponent<Arrow>();
+        if (arrowComponent != null)
+        {
+            arrowComponent.SetDirection(shootDirection);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerController: Arrow prefab doesn't have Arrow component!");
+        }
+    }
+
+    private Vector3 CalculateShootDirection(Vector3 spawnPosition)
+    {
+        if (Camera.main == null)
+        {
+            return transform.forward;
+        }
+
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
+        Vector3 targetPoint;
+
+        if (Physics.Raycast(ray, out RaycastHit hit, cameraAimRayDistance, cameraAimLayerMask))
+        {
+            targetPoint = hit.point;   // điểm trúng
+        }
+        else
+        {
+            targetPoint = ray.GetPoint(cameraAimRayDistance); // nếu không trúng gì
+        }
+
+        return (targetPoint - spawnPosition).normalized;
+    }
+
+    #endregion
+
+    #region Visual & Camera
+
+    private void UpdateCameraTarget()
+    {
+        if (camTarget == null) return;
+        
+        // Xoay camTarget theo pitch (chỉ xoay trục X)
+        camTarget.localRotation = Quaternion.Euler(lookRotation.x, 0f, 0f);
+    }
+
+    #endregion
+
+    #region UI
+
+    private void UpdateCooldownUI()
+    {
+        if (UIManager.Instance == null || UIManager.Instance.gamePlayPanel == null)
+        {
+            return;
+        }
+
+        UIManager.Instance.gamePlayPanel.SetCountDown(shootCooldownTimer, shootCooldown);
+    }
+
+    #endregion
+
+    #region Update Timers
+
+    private void FixedUpdate()
+    {
+        // Cập nhật timer bắn
+        if (isShooting)
+        {
+            shootStopTimer -= Time.deltaTime;
+            if (shootStopTimer <= 0f)
+            {
+                isShooting = false;
+            }
+        }
+
+        // Cập nhật cooldown bắn
+        if (shootCooldownTimer > 0f)
+        {
+            shootCooldownTimer = Mathf.Max(0f, shootCooldownTimer - Time.deltaTime);
+            UpdateCooldownUI();
+        }
+    }
+
+    #endregion
+
+    #region Public Methods
+
+    public void SetDisable(bool disable)
+    {
+        isDisable = disable;
+        
+        if (characterController != null)
+        {
+            characterController.enabled = !disable;
+        }
+        
+        if (disable)
+        {
+            if (cameraController != null)
+            {
+                cameraController.SetTarget(null);
+            }
+            SetIdleAnimation();
+        }
+        else
+        {
+            SetupCamera();
+        }
+    }
+
+    public void SetIdleAnimation()
+    {
+        // Set movement to idle (speed = 0)
+        playerAnimation?.SetMovement(false, 0f);
+    }
+
+    /// <summary>
+    /// Lấy look rotation hiện tại (pitch, yaw)
+    /// </summary>
+    public Vector2 GetLookRotation()
+    {
+        return lookRotation;
+    }
+
+    /// <summary>
+    /// Set look rotation
+    /// </summary>
+    public void SetLookRotation(Vector2 rotation)
+    {
+        lookRotation.x = Mathf.Clamp(rotation.x, minPitch, maxPitch);
+        lookRotation.y = rotation.y;
+    }
+
+    public GameObject GetModel()
+    {
+        return model;
+    }
+
+    #endregion
 }

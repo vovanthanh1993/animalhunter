@@ -8396,6 +8396,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd51428cfa5afe247957f12b71d7a89d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  restrictLookToRightHalf: 1
 --- !u!4 &1087914045
 Transform:
   m_ObjectHideFlags: 0
