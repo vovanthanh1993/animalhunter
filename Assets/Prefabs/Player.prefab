@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7912129489728802135}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: ArrowPos
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25,10 +25,11 @@ Transform:
   m_GameObject: {fileID: 260823474670912}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.88313293, y: 0.14926088, z: -0}
+  m_LocalPosition: {x: 0.88313293, y: 0.14, z: 0.151}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 8161603198306504682}
   m_Father: {fileID: 58596067955913411}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &504016811183326125
@@ -40,7 +41,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 134761639639048619}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: control-foot-roll.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -75,7 +76,7 @@ GameObject:
   - component: {fileID: 2473583323488772271}
   - component: {fileID: 1138123865664332536}
   - component: {fileID: 1029220920469551623}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Throwable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -159,7 +160,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5897348934102980201}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: elbowIK.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -190,7 +191,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8137011657399295456}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: foot.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -222,7 +223,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8919300752998091130}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: upperleg.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -254,7 +255,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8602600888841292254}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: lowerarm.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -286,7 +287,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8776428761907892675}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: handslot.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -321,7 +322,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5297868602499175564}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: IK-toe.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +356,7 @@ GameObject:
   - component: {fileID: 6746128832462614512}
   - component: {fileID: 7249825808055512123}
   - component: {fileID: 5759702462347803797}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -377,6 +378,7 @@ Transform:
   m_Children:
   - {fileID: 7912129489728802135}
   - {fileID: 2651572275900388686}
+  - {fileID: 2721718546291712734}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6746128832462614512
@@ -410,8 +412,17 @@ MonoBehaviour:
   shootKey: 1
   shootStopDuration: 0.5
   shootCooldown: 2
-  arrowPrefab: {fileID: 2900229380165484194, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+  arrowPrefab: {fileID: 8083028573473967546, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
   arrowSpawnPoint: {fileID: 7912129489728802135}
+  cameraAimRayDistance: 20
+  cameraAimLayerMask:
+    serializedVersion: 2
+    m_Bits: 55
+  canReceiveInput: 1
+  alignWithLookInput: 1
+  lookRotationSpeed: 100
+  lookInputThreshold: 0.02
+  cameraTransform: {fileID: 0}
 --- !u!143 &5759702462347803797
 CharacterController:
   m_ObjectHideFlags: 0
@@ -430,7 +441,7 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2
+  m_Height: 1.7
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.3
@@ -446,7 +457,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 585420195531654163}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: hand.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -469,6 +480,37 @@ Transform:
   - {fileID: 8776428761907892675}
   m_Father: {fileID: 5612433408727476392}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2162161260885713451
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2721718546291712734}
+  m_Layer: 0
+  m_Name: CameraPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2721718546291712734
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2162161260885713451}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.11, y: 0.82, z: -1.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 58596067955913411}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2170718159483109483
 GameObject:
   m_ObjectHideFlags: 0
@@ -480,7 +522,7 @@ GameObject:
   - component: {fileID: 3266257185257919110}
   - component: {fileID: 2965252601048044688}
   - component: {fileID: 4539779682868786517}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Knife
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -565,7 +607,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6420220726539746543}
   - component: {fileID: 1505356449188471143}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rogue_LegLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -693,7 +735,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 291400052939530225}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: toes.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -724,7 +766,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7244303383812518573}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: handIK.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -755,7 +797,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8537021010090530904}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: handIK.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -786,7 +828,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8709069194453636666}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: wrist.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -818,7 +860,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7929268289571351891}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: IK-toe.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -849,7 +891,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1101318065297078311}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: hand.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -882,7 +924,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2651572275900388686}
   - component: {fileID: 2143521254113577236}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rogue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -943,7 +985,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6157246903614607998}
   - component: {fileID: 7746186548529226229}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rogue_ArmLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1072,7 +1114,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3045559848123700985}
   - component: {fileID: 4712357880620172663}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rogue_Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1201,7 +1243,7 @@ GameObject:
   m_Component:
   - component: {fileID: 172234158667849342}
   - component: {fileID: 2032555198634227557}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rogue_ArmRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1329,7 +1371,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5486799139223813690}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: heelIK.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1360,7 +1402,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3181910859103629918}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: upperarm.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1392,7 +1434,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6493186757077365844}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: lowerleg.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1424,7 +1466,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4236101399803330640}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: IK-foot.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1455,7 +1497,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 375980294869187746}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: heelIK.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1486,7 +1528,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8074983028171450425}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: toes.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1517,7 +1559,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5903242909351111206}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: foot.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1549,7 +1591,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1071652669576704229}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: lowerleg.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1581,7 +1623,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3579368680396666684}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: spine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1613,7 +1655,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5917690829352590142}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1653,7 +1695,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6498445771692422609}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1686,7 +1728,7 @@ GameObject:
   - component: {fileID: 6266041149983253678}
   - component: {fileID: 6317237175913999205}
   - component: {fileID: 3832349958082044388}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: 1H_Crossbow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1770,7 +1812,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3957927484732075673}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: kneeIK.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1801,7 +1843,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9147993987902662309}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: chest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1836,7 +1878,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3335216781163975277}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: kneeIK.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1867,7 +1909,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5612433408727476392}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: wrist.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1899,7 +1941,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1963485334829634627}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: elbowIK.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1930,7 +1972,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5692976144059583916}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: control-foot-roll.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1963,7 +2005,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9012783872537377804}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: hips
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1997,7 +2039,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6629575035639185649}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: upperarm.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2029,7 +2071,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8366912335166699494}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: control-toe-roll.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2061,7 +2103,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5694843583873234641}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: control-heel-roll.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2094,7 +2136,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3553531471473716679}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: upperleg.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2126,7 +2168,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2087700365008817869}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: lowerarm.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2159,7 +2201,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8125883945503823043}
   - component: {fileID: 263154793922893697}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rogue_LegRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2287,7 +2329,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5830828841349323961}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: IK-foot.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2320,7 +2362,7 @@ GameObject:
   - component: {fileID: 8025708897047824568}
   - component: {fileID: 8883422861472518602}
   - component: {fileID: 5259275609717497186}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rogue_Cape
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2405,7 +2447,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9199329737663523927}
   - component: {fileID: 2667258932568779466}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rogue_Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2533,7 +2575,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6828213376300696954}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: control-heel-roll.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2566,7 +2608,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 60355283245368493}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: control-toe-roll.r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2598,7 +2640,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2151656018382703570}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Rig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2632,7 +2674,7 @@ GameObject:
   - component: {fileID: 1941496702282507367}
   - component: {fileID: 3294869333664800808}
   - component: {fileID: 2354050236891355993}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Knife_Offhand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2716,7 +2758,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7129886033670634603}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: handslot.l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2750,7 +2792,7 @@ GameObject:
   - component: {fileID: 912982752001091849}
   - component: {fileID: 6654750718440737480}
   - component: {fileID: 8148131321096341582}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: 2H_Crossbow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2825,3 +2867,65 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &3276429220717665238
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7912129489728802135}
+    m_Modifications:
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2554807547888034840, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2900229380165484194, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+      propertyPath: m_Name
+      value: Arrow
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+--- !u!4 &8161603198306504682 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6646154000197899324, guid: e36d4beffee3c1041846244fbcbbe411, type: 3}
+  m_PrefabInstance: {fileID: 3276429220717665238}
+  m_PrefabAsset: {fileID: 0}

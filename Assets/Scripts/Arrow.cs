@@ -6,49 +6,10 @@ public class Arrow : MonoBehaviour
     public float speed = 20f;
     public float lifeTime = 1f;
     public float damage = 10f;
-    
-    [Header("Top-Down Rotation Settings")]
-    public float fixedRotationY = 0f;
-    public Vector3 rotationOffset = Vector3.zero;
-    public bool updateRotationWhileFlying = true;
-    
-    private Vector2 direction;
-    private Vector3 direction3D;
+    public bool alignWithMovement = true;
+
+    private Vector3 direction = Vector3.zero;
     private bool isDestroyed = false;
-
-    public void SetDirection(Vector2 dir)
-    {
-        direction = dir.normalized;
-        direction3D = new Vector3(direction.x, 0f, direction.y);
-        UpdateRotation();
-    }
-    
-    private void UpdateRotation()
-    {
-        if (direction.sqrMagnitude < 0.001f) return;
-        
-        float angleZ = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg;
-        
-        Vector3 finalRotation = new Vector3(
-            -90f + rotationOffset.x,
-            fixedRotationY,
-            angleZ + rotationOffset.z
-        );
-        
-        transform.rotation = Quaternion.Euler(finalRotation);
-    }
-
-    void Update()
-    {
-        if (direction.sqrMagnitude < 0.001f) return;
-        
-        transform.Translate(direction3D * speed * Time.deltaTime, Space.World);
-        
-        if (updateRotationWhileFlying)
-        {
-            UpdateRotation();
-        }
-    }
 
     void Start()
     {
@@ -66,6 +27,29 @@ public class Arrow : MonoBehaviour
         {
             damage = PlayerDataManager.Instance.playerData.damage;
         }
+    }
+
+    public void SetDirection(Vector3 dir)
+    {
+        direction = dir.normalized;
+
+        if (direction.sqrMagnitude < 0.0001f || !alignWithMovement)
+        {
+            return;
+        }
+
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        transform.rotation = lookRotation;
+    }
+
+    void Update()
+    {
+        if (direction.sqrMagnitude < 0.0001f)
+        {
+            return;
+        }
+
+        transform.Translate(direction * speed * Time.deltaTime, Space.World);
     }
 
     void OnTriggerEnter(Collider other)

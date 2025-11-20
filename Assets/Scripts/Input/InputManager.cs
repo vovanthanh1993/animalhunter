@@ -43,4 +43,9 @@ public class InputManager : MonoBehaviour
     {
         return InputSystem.Player.Attack.triggered;
     }
+
+    public Vector2 InputLookVector()
+    {
+        return InputSystem.Player.Look.ReadValue<Vector2>();
+    }
 }
