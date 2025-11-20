@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.InputSystem.Controls;
 
 public class InputManager : MonoBehaviour
 {
@@ -9,6 +11,10 @@ public class InputManager : MonoBehaviour
     [Header("Look Input Settings")]
     [Tooltip("Chỉ cho phép Look input từ pointer (mouse/touch) khi ở nửa màn hình bên phải")]
     public bool restrictLookToRightHalf = true;
+    
+    // Multi-touch tracking
+    private Vector2 lastRightHalfTouchPosition = Vector2.zero;
+    private int rightHalfTouchId = -1;
 
     private void OnEnable()
     {
@@ -27,11 +33,23 @@ public class InputManager : MonoBehaviour
             Instance = this;
             InputSystem = new InputSystem_Actions();
             InputSystem.Enable();
+            
+            // Enable Enhanced Touch để hỗ trợ multi-touch tốt hơn
+            EnhancedTouchSupport.Enable();
+            
             DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            EnhancedTouchSupport.Disable();
         }
     }
 
@@ -52,47 +70,164 @@ public class InputManager : MonoBehaviour
 
     public Vector2 InputLookVector()
     {
-        Vector2 lookInput = InputSystem.Player.Look.ReadValue<Vector2>();
-        
         // Nếu không restrict, trả về input bình thường
         if (!restrictLookToRightHalf)
         {
-            return lookInput;
+            return InputSystem.Player.Look.ReadValue<Vector2>();
         }
         
-        // Kiểm tra xem có input không
-        if (lookInput.magnitude > 0.01f)
+        // Kiểm tra mouse
+        if (Mouse.current != null)
         {
-            // Kiểm tra xem có mouse hoặc touch đang hoạt động không
-            bool hasMouse = Mouse.current != null && Mouse.current.delta.ReadValue().magnitude > 0.01f;
-            bool hasTouch = Touchscreen.current != null && Touchscreen.current.touches.Count > 0;
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
             
-            // Nếu có pointer input (mouse hoặc touch), kiểm tra vị trí
-            if (hasMouse || hasTouch)
+            // Nếu mouse đang di chuyển, kiểm tra vị trí
+            if (mouseDelta.magnitude > 0.01f)
             {
-                Vector2 pointerPosition = GetPointerPosition();
-                
-                // Nếu lấy được vị trí pointer, kiểm tra vùng
-                if (pointerPosition != Vector2.zero)
+                float screenX = mousePos.x / Screen.width;
+                if (screenX >= 0.5f)
                 {
-                    float screenX = pointerPosition.x / Screen.width;
+                    // Mouse ở nửa màn hình bên phải - cho phép input
+                    return mouseDelta;
+                }
+                else
+                {
+                    // Mouse ở nửa màn hình bên trái - chặn input
+                    return Vector2.zero;
+                }
+            }
+        }
+        
+        // Xử lý multi-touch - chỉ tính toán delta từ touch ở nửa phải
+        Vector2 touchLookDelta = GetRightHalfTouchLookDelta();
+        if (touchLookDelta.magnitude > 0.01f)
+        {
+            return touchLookDelta;
+        }
+        
+        // Kiểm tra xem có touch ở nửa trái không - nếu có thì chặn look input
+        if (Touchscreen.current != null && Touchscreen.current.touches.Count > 0)
+        {
+            // Có touch nhưng không phải ở nửa phải - chặn look input
+            return Vector2.zero;
+        }
+        
+        // Nếu không có pointer input (gamepad, joystick), trả về input từ Input System
+        return InputSystem.Player.Look.ReadValue<Vector2>();
+    }
+    
+    /// <summary>
+    /// Tính toán look delta từ touch ở nửa màn hình bên phải (hỗ trợ multi-touch)
+    /// </summary>
+    private Vector2 GetRightHalfTouchLookDelta()
+    {
+        if (Touchscreen.current == null)
+        {
+            rightHalfTouchId = -1;
+            lastRightHalfTouchPosition = Vector2.zero;
+            return Vector2.zero;
+        }
+        
+        var touches = Touchscreen.current.touches;
+        if (touches.Count == 0)
+        {
+            rightHalfTouchId = -1;
+            lastRightHalfTouchPosition = Vector2.zero;
+            return Vector2.zero;
+        }
+        
+        // Tìm touch ở nửa phải
+        TouchControl rightHalfTouch = null;
+        Vector2 rightHalfTouchPosition = Vector2.zero;
+        
+        // Nếu đã có touch ID được track, tìm touch đó trước
+        if (rightHalfTouchId >= 0)
+        {
+            for (int i = 0; i < touches.Count; i++)
+            {
+                var touch = touches[i];
+                var touchId = touch.touchId.ReadValue();
+                if (touchId == rightHalfTouchId)
+                {
+                    var position = touch.position.ReadValue();
+                    float screenX = position.x / Screen.width;
+                    
+                    // Kiểm tra xem touch có vẫn ở nửa phải không
                     if (screenX >= 0.5f)
                     {
-                        // Pointer ở nửa màn hình bên phải - cho phép input
-                        return lookInput;
+                        rightHalfTouch = touch;
+                        rightHalfTouchPosition = position;
+                        break;
                     }
                     else
                     {
-                        // Pointer ở nửa màn hình bên trái - chặn input
-                        return Vector2.zero;
+                        // Touch đã di chuyển ra khỏi nửa phải - reset
+                        rightHalfTouchId = -1;
+                        lastRightHalfTouchPosition = Vector2.zero;
                     }
                 }
             }
-            // Nếu không có pointer input (gamepad, joystick), cho phép input
         }
         
-        // Trả về input
-        return lookInput;
+        // Nếu không tìm thấy touch đã track, tìm touch mới ở nửa phải
+        if (rightHalfTouch == null)
+        {
+            for (int i = 0; i < touches.Count; i++)
+            {
+                var touch = touches[i];
+                var position = touch.position.ReadValue();
+                var phase = touch.phase.ReadValue();
+                float screenX = position.x / Screen.width;
+                
+                // Tìm touch ở nửa phải và đang bắt đầu hoặc di chuyển
+                if (screenX >= 0.5f && 
+                    (phase == UnityEngine.InputSystem.TouchPhase.Began || 
+                     phase == UnityEngine.InputSystem.TouchPhase.Moved ||
+                     phase == UnityEngine.InputSystem.TouchPhase.Stationary))
+                {
+                    rightHalfTouch = touch;
+                    rightHalfTouchPosition = position;
+                    rightHalfTouchId = touch.touchId.ReadValue();
+                    break;
+                }
+            }
+        }
+        
+        // Tính toán delta
+        if (rightHalfTouch != null)
+        {
+            var phase = rightHalfTouch.phase.ReadValue();
+            
+            // Nếu touch đã kết thúc, reset
+            if (phase == UnityEngine.InputSystem.TouchPhase.Ended || 
+                phase == UnityEngine.InputSystem.TouchPhase.Canceled)
+            {
+                rightHalfTouchId = -1;
+                lastRightHalfTouchPosition = Vector2.zero;
+                return Vector2.zero;
+            }
+            
+            // Tính delta từ vị trí hiện tại và vị trí trước đó
+            Vector2 delta = Vector2.zero;
+            if (lastRightHalfTouchPosition != Vector2.zero)
+            {
+                delta = rightHalfTouchPosition - lastRightHalfTouchPosition;
+            }
+            else
+            {
+                // Lần đầu tiên, dùng delta từ touch
+                delta = rightHalfTouch.delta.ReadValue();
+            }
+            
+            lastRightHalfTouchPosition = rightHalfTouchPosition;
+            return delta;
+        }
+        
+        // Không có touch ở nửa phải
+        rightHalfTouchId = -1;
+        lastRightHalfTouchPosition = Vector2.zero;
+        return Vector2.zero;
     }
     
     /// <summary>
@@ -134,55 +269,4 @@ public class InputManager : MonoBehaviour
         return false;
     }
     
-    /// <summary>
-    /// Lấy vị trí pointer hiện tại (mouse hoặc touch)
-    /// </summary>
-    private Vector2 GetPointerPosition()
-    {
-        // Kiểm tra mouse trước
-        if (Mouse.current != null)
-        {
-            Vector2 mousePos = Mouse.current.position.ReadValue();
-            // Kiểm tra xem mouse có đang di chuyển không
-            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
-            if (mouseDelta.magnitude > 0.01f || mousePos.magnitude > 0f)
-            {
-                return mousePos;
-            }
-        }
-        
-        // Nếu không có mouse, kiểm tra touch
-        if (Touchscreen.current != null)
-        {
-            var touches = Touchscreen.current.touches;
-            if (touches.Count > 0)
-            {
-                // Tìm touch đang di chuyển hoặc đang được nhấn
-                for (int i = 0; i < touches.Count; i++)
-                {
-                    var touch = touches[i];
-                    var delta = touch.delta.ReadValue();
-                    var phase = touch.phase.ReadValue();
-                    var position = touch.position.ReadValue();
-                    
-                    // Nếu touch đang di chuyển hoặc đang được nhấn
-                    if (delta.magnitude > 0.01f || 
-                        phase == UnityEngine.InputSystem.TouchPhase.Moved || 
-                        phase == UnityEngine.InputSystem.TouchPhase.Stationary ||
-                        phase == UnityEngine.InputSystem.TouchPhase.Began)
-                    {
-                        return position;
-                    }
-                }
-                
-                // Nếu không có touch đang di chuyển, lấy touch đầu tiên
-                if (touches.Count > 0)
-                {
-                    return touches[0].position.ReadValue();
-                }
-            }
-        }
-        
-        return Vector2.zero;
-    }
 }
