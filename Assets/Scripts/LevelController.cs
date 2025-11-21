@@ -33,6 +33,22 @@ public class LevelController : MonoBehaviour
         if (nextButton != null)
             nextButton.onClick.AddListener(ShowNextPage);
     }
+    
+    private void OnEnable()
+    {
+        // Refresh lại dữ liệu khi panel được enable (khi quay về từ level)
+        Refresh();
+    }
+    
+    /// <summary>
+    /// Refresh lại UI với dữ liệu mới nhất từ PlayerData
+    /// </summary>
+    public void Refresh()
+    {
+        LoadPlayerData();
+        // Luôn rebuild page để hiển thị số sao mới nhất
+        BuildPage(currentPage);
+    }
 
     private void LoadPlayerData()
     {

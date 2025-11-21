@@ -43,6 +43,16 @@ public class UIManager : MonoBehaviour
         if (selectLevelPanel != null)
         {
             selectLevelPanel.SetActive(isShow);
+            
+            // Refresh LevelController khi panel được hiển thị
+            if (isShow)
+            {
+                LevelController levelController = selectLevelPanel.GetComponentInChildren<LevelController>();
+                if (levelController != null)
+                {
+                    levelController.Refresh();
+                }
+            }
         }
     }
 

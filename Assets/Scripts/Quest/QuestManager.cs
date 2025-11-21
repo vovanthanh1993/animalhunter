@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class QuestManager : MonoBehaviour
 {
@@ -88,12 +89,90 @@ public class QuestManager : MonoBehaviour
         // Lưu reward vào PlayerData
         SaveRewardToPlayerData(reward);
         
+        // Lưu số sao vào PlayerLevelData
+        SaveStarsToLevelData(stars);
+        
         Debug.Log($"Quest hoàn thành! Thời gian: {GetGameTimeFormatted()}, Số sao: {stars}, Reward: {reward}");
 
         Time.timeScale = 0f;
 
         UIManager.Instance.gamePlayPanel.ShowWinPanel(true, stars, reward);
         // Trigger next level, reward...
+    }
+    
+    /// <summary>
+    /// Lấy số level từ tên scene (ví dụ: "Level1" -> 1, "Level2" -> 2)
+    /// </summary>
+    int GetCurrentLevelFromScene()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+        
+        // Kiểm tra nếu scene name bắt đầu bằng "Level"
+        if (sceneName.StartsWith("Level"))
+        {
+            // Lấy phần số sau "Level"
+            string levelStr = sceneName.Substring(5); // Bỏ qua "Level"
+            
+            if (int.TryParse(levelStr, out int level))
+            {
+                return level;
+            }
+        }
+        
+        // Fallback: trả về 1 nếu không parse được
+        Debug.LogWarning($"QuestManager: Không thể parse level từ scene name: {sceneName}");
+        return 1;
+    }
+    
+    /// <summary>
+    /// Lưu số sao vào PlayerLevelData và unlock level tiếp theo
+    /// </summary>
+    /// <param name="stars">Số sao đạt được (1-3)</param>
+    void SaveStarsToLevelData(int stars)
+    {
+        if (PlayerDataManager.Instance == null || PlayerDataManager.Instance.playerData == null)
+        {
+            Debug.LogWarning("QuestManager: Cannot save stars - PlayerDataManager is null");
+            return;
+        }
+        
+        int currentLevel = GetCurrentLevelFromScene();
+        Debug.Log($"Current level: {currentLevel}");
+        PlayerData playerData = PlayerDataManager.Instance.playerData;
+        
+        // Tìm level data tương ứng với currentLevel
+        PlayerLevelData levelData = playerData.levels.Find(l => l.level == currentLevel);
+        
+        if (levelData != null)
+        {
+            // Chỉ cập nhật nếu số sao mới cao hơn số sao cũ
+            if (stars > levelData.star)
+            {
+                levelData.star = stars;
+                Debug.Log($"Đã lưu {stars} sao cho Level {currentLevel}");
+            }
+            else
+            {
+                Debug.Log($"Level {currentLevel} đã có {levelData.star} sao, không cập nhật với {stars} sao");
+            }
+            
+            // Unlock level tiếp theo nếu chưa unlock
+            int nextLevel = currentLevel + 1;
+            PlayerLevelData nextLevelData = playerData.levels.Find(l => l.level == nextLevel);
+            
+            if (nextLevelData != null && nextLevelData.isLocked)
+            {
+                nextLevelData.isLocked = false;
+                Debug.Log($"Đã unlock Level {nextLevel}");
+            }
+            
+            // Lưu dữ liệu
+            PlayerDataManager.Instance.Save();
+        }
+        else
+        {
+            Debug.LogWarning($"QuestManager: Không tìm thấy Level {currentLevel} trong PlayerData");
+        }
     }
 
     /// <summary>

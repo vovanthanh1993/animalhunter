@@ -17,4 +17,7 @@ MonoBehaviour:
   objectives:
   - type: 0
     targetId: deer
-    requiredAmount: 2
+    requiredAmount: 1
+  timeFor3Stars: 60
+  timeFor2Stars: 120
+  rewardList: 320000006400000096000000
