@@ -534,7 +534,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59186832fc300e24eb20a6baf82d9cf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentQuest: {fileID: 11400000, guid: 5f78787602410ae45986cc64efa31e80, type: 2}
+  currentQuest: {fileID: 11400000, guid: fe2872f1896897d4398c8c9359dfb7cf, type: 2}
 --- !u!4 &474966407
 Transform:
   m_ObjectHideFlags: 0

@@ -8,9 +8,8 @@ public class Level : MonoBehaviour
     public bool isLocked = true;
     public Image lockImage;
     private PlayerLevelData levelData;
-    private PlayerData playerData;
 
-    public void Init(PlayerLevelData data, PlayerData playerData) {
+    public void Init(PlayerLevelData data) {
         levelData = data;
         isLocked = data.isLocked;
         levelText.text = data.level.ToString();
@@ -19,7 +18,6 @@ public class Level : MonoBehaviour
         {
             lockImage.gameObject.SetActive(isLocked);
         }
-        this.playerData = playerData;
     }
 
     public void OnClick()
@@ -28,7 +26,7 @@ public class Level : MonoBehaviour
         if (isLocked) return;
         if (UIManager.Instance.startPanel != null)
         {
-            UIManager.Instance.startPanel.ShowForLevel(levelData, playerData);
+            UIManager.Instance.startPanel.ShowForLevel(levelData);
             UIManager.Instance.ShowSelectLevelPanel(false);
         }
     }

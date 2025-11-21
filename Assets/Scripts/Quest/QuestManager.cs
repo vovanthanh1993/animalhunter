@@ -8,7 +8,7 @@ public class QuestManager : MonoBehaviour
 
     public QuestData currentQuest;
     
-    public Dictionary<string, int> progress = new Dictionary<string, int>();
+    public Dictionary<EnemyType, int> progress = new Dictionary<EnemyType, int>();
 
     private bool questCompleted = false;
     
@@ -34,7 +34,11 @@ public class QuestManager : MonoBehaviour
 
         foreach (var obj in currentQuest.objectives)
         {
-            progress[obj.targetId] = 0;
+            // Chỉ khởi tạo progress cho objectives có type KillAnimal
+            if (obj.type == QuestTargetType.KillAnimal)
+            {
+                progress[obj.enemyType] = 0;
+            }
         }
     }
 
@@ -47,23 +51,23 @@ public class QuestManager : MonoBehaviour
         GUIPanel.Instance.SetTime(GetGameTimeFormatted());
     }
 
-    public void OnEnemyKilled(string enemyId)
+    public void OnEnemyKilled(EnemyType enemyType)
     {
-        if (!progress.ContainsKey(enemyId))
+        if (!progress.ContainsKey(enemyType))
             return;
 
-        progress[enemyId]++;
+        progress[enemyType]++;
 
-        Debug.Log($"{enemyId} progress: {progress[enemyId]} / {GetRequiredAmount(enemyId)}");
+        Debug.Log($"{enemyType} progress: {progress[enemyType]} / {GetRequiredAmount(enemyType)}");
 
         CheckQuestComplete();
     }
 
-    int GetRequiredAmount(string enemyId)
+    int GetRequiredAmount(EnemyType enemyType)
     {
         foreach (var obj in currentQuest.objectives)
         {
-            if (obj.targetId == enemyId)
+            if (obj.type == QuestTargetType.KillAnimal && obj.enemyType == enemyType)
                 return obj.requiredAmount;
         }
         return 0;
@@ -76,8 +80,12 @@ public class QuestManager : MonoBehaviour
 
         foreach (var obj in currentQuest.objectives)
         {
-            if (progress[obj.targetId] < obj.requiredAmount)
-                return;
+            // Chỉ check objectives có type KillAnimal
+            if (obj.type == QuestTargetType.KillAnimal)
+            {
+                if (!progress.ContainsKey(obj.enemyType) || progress[obj.enemyType] < obj.requiredAmount)
+                    return;
+            }
         }
 
         questCompleted = true;

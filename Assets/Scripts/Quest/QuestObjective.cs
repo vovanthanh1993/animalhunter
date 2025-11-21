@@ -4,7 +4,7 @@ using UnityEngine;
 public class QuestObjective
 {
     public QuestTargetType type;
-    public string targetId; 
+    public EnemyType enemyType; 
     public int requiredAmount;
 }
 

@@ -34,12 +34,6 @@ public class LevelController : MonoBehaviour
             nextButton.onClick.AddListener(ShowNextPage);
     }
     
-    private void OnEnable()
-    {
-        // Refresh lại dữ liệu khi panel được enable (khi quay về từ level)
-        Refresh();
-    }
-    
     /// <summary>
     /// Refresh lại UI với dữ liệu mới nhất từ PlayerData
     /// </summary>
@@ -94,7 +88,7 @@ public class LevelController : MonoBehaviour
                 };
             }
 
-            levelComponent.Init(levelInfo, playerData);
+            levelComponent.Init(levelInfo);
             spawnedLevels.Add(levelComponent);
         }
 

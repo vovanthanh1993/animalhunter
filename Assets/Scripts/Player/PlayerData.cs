@@ -5,11 +5,8 @@ using System.Collections.Generic;
 public class PlayerData
 {
     public List<PlayerLevelData> levels = new List<PlayerLevelData>();
-    public List<QuestStatus> quests = new List<QuestStatus>();
     public int health;
-
     public int damage;
-
     public int speed;
     public int totalReward = 0;
 
@@ -25,9 +22,6 @@ public class PlayerData
                 isLocked = i != 0
             });
         }
-        data.quests.Add(new QuestStatus { questId = "Quest 1", completed = false });
-        data.quests.Add(new QuestStatus { questId = "Quest 2", completed = false });
-        data.quests.Add(new QuestStatus { questId = "Quest 3", completed = false });
         data.totalReward = 0;
         data.health = 100;
         data.damage = 30;
@@ -43,11 +37,4 @@ public class PlayerLevelData
     public int level;
     public int star;
     public bool isLocked;
-}
-
-[Serializable]
-public class QuestStatus
-{
-    public string questId;
-    public bool completed;
 }

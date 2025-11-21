@@ -18,7 +18,7 @@ public class EnemyHealth : MonoBehaviour
     private Coroutine runCoroutine;
     private bool isDead = false;
 
-    public string enemyId;
+    public EnemyType enemyType;
 
     void Start()
     {
@@ -103,7 +103,10 @@ public class EnemyHealth : MonoBehaviour
     private IEnumerator DestroyAfterDelay()
     {
         yield return new WaitForSeconds(dieDelay);
-        QuestManager.Instance.OnEnemyKilled(enemyId);
+        if (QuestManager.Instance != null)
+        {
+            QuestManager.Instance.OnEnemyKilled(enemyType);
+        }
         Destroy(gameObject);
     }
 }

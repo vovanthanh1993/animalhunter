@@ -1,9 +1,10 @@
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.UI;
 
-public class StartPanel : MonoBehaviour
+public class QuestInfo : MonoBehaviour
 {
     [Header("Panel UI")]
     public TextMeshProUGUI levelTitle;
@@ -11,44 +12,42 @@ public class StartPanel : MonoBehaviour
     public TextMeshProUGUI star2TimeText;
     public TextMeshProUGUI star3TimeText;
 
-    private PlayerLevelData currentLevelData;
+    public Button closeBtn;
 
-    public void ShowForLevel(PlayerLevelData levelData)
-    {
-        currentLevelData = levelData;
-
-        gameObject.SetActive(true);
-        levelTitle.text = "Level " + levelData.level;
-
-        // Load và hiển thị description từ QuestData đầu tiên (Quest1) mặc định
-        // Quest index = level number (Level 1 -> Quest1, Level 2 -> Quest2...)
-        LoadQuestDescription(levelData.level);
-
+    void Start() {
+        closeBtn.onClick.AddListener(OnCloseButtonClicked);
     }
-    
+
+    void OnCloseButtonClicked() {
+        gameObject.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+    private void OnEnable() {
+        UpdateQuestInfo();
+    }
+
     /// <summary>
-    /// Load QuestData từ Resources dựa trên quest index và hiển thị description
+    /// Cập nhật thông tin quest từ QuestManager
     /// </summary>
-    private void LoadQuestDescription(int questIndex)
+    public void UpdateQuestInfo()
     {
-        // Load QuestData từ Resources: Quest1, Quest2, Quest3...
-        // Quest index có thể là level number hoặc quest number trong level
-        string questName = $"Quest{questIndex}";
-        QuestData questData = Resources.Load<QuestData>($"Quest/{questName}");
-        
-        // Nếu không tìm thấy trong Resources/Quest/, thử load trực tiếp
-        if (questData == null)
+        if (QuestManager.Instance == null || QuestManager.Instance.currentQuest == null)
         {
-            questData = Resources.Load<QuestData>(questName);
-        }
-        
-        if (questData == null)
-        {
-            Debug.LogWarning($"Không tìm thấy QuestData: Quest{questIndex}. Hãy đảm bảo Quest{questIndex}.asset nằm trong Resources/Quest/");
+            Debug.LogWarning("QuestInfo: QuestManager.Instance hoặc currentQuest là null");
             return;
         }
-        
-        // Tạo description từ QuestObjective
+
+        QuestData questData = QuestManager.Instance.currentQuest;
+
+        // Hiển thị level title từ scene name
+        if (levelTitle != null)
+        {
+            int level = GetCurrentLevelFromScene();
+            levelTitle.text = "Level " + level;
+        }
+
+        // Tạo và hiển thị description từ QuestObjective
         if (description != null)
         {
             string generatedDescription = GenerateDescriptionFromObjectives(questData.objectives);
@@ -58,26 +57,44 @@ public class StartPanel : MonoBehaviour
             }
             else if (!string.IsNullOrEmpty(questData.description))
             {
-                // Fallback về description có sẵn nếu không có objectives
                 description.text = questData.description;
             }
         }
-        
+
         // Hiển thị thời gian để đạt 2 sao
         if (star2TimeText != null)
         {
             string timeFormatted = FormatTime(questData.timeFor2Stars);
             star2TimeText.text = $"Complete quest in {timeFormatted}";
         }
-        
-        // Hiển thị thời gian để đạt 3 sao (nếu có)
+
+        // Hiển thị thời gian để đạt 3 sao
         if (star3TimeText != null)
         {
             string timeFormatted = FormatTime(questData.timeFor3Stars);
             star3TimeText.text = $"Complete quest in {timeFormatted}";
         }
     }
-    
+
+    /// <summary>
+    /// Lấy số level từ tên scene
+    /// </summary>
+    private int GetCurrentLevelFromScene()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+
+        if (sceneName.StartsWith("Level"))
+        {
+            string levelStr = sceneName.Substring(5);
+            if (int.TryParse(levelStr, out int level))
+            {
+                return level;
+            }
+        }
+
+        return 1;
+    }
+
     /// <summary>
     /// Tạo description từ QuestObjective array
     /// </summary>
@@ -87,15 +104,15 @@ public class StartPanel : MonoBehaviour
             return "";
 
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        
+
         // Nhóm objectives theo type
         List<QuestObjective> killAnimalObjectives = new List<QuestObjective>();
         List<QuestObjective> collectItemObjectives = new List<QuestObjective>();
-        
+
         foreach (var obj in objectives)
         {
             if (obj == null) continue;
-            
+
             if (obj.type == QuestTargetType.KillAnimal)
             {
                 killAnimalObjectives.Add(obj);
@@ -105,13 +122,13 @@ public class StartPanel : MonoBehaviour
                 collectItemObjectives.Add(obj);
             }
         }
-        
-        // Format KillAnimal objectives: "Hunt 1 deer, 3 boar"
+
+        // Format KillAnimal objectives: "Hunt 1 deer, 4 fox"
         if (killAnimalObjectives.Count > 0)
         {
             sb.Append(FormatKillAnimalObjectives(killAnimalObjectives));
         }
-        
+
         // Format CollectItem objectives
         if (collectItemObjectives.Count > 0)
         {
@@ -121,10 +138,10 @@ public class StartPanel : MonoBehaviour
             }
             sb.Append(FormatCollectItemObjectives(collectItemObjectives));
         }
-        
+
         return sb.ToString();
     }
-    
+
     /// <summary>
     /// Format các KillAnimal objectives thành "Hunt 1 deer, 4 fox"
     /// </summary>
@@ -132,26 +149,26 @@ public class StartPanel : MonoBehaviour
     {
         if (objectives == null || objectives.Count == 0)
             return "";
-        
+
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         sb.Append("Hunt ");
-        
+
         for (int i = 0; i < objectives.Count; i++)
         {
             QuestObjective obj = objectives[i];
             string enemyName = obj.enemyType.ToString().ToLower();
-            
+
             if (i > 0)
             {
                 sb.Append(", ");
             }
-            
+
             sb.Append($"{obj.requiredAmount} {enemyName}");
         }
-        
+
         return sb.ToString();
     }
-    
+
     /// <summary>
     /// Format các CollectItem objectives
     /// </summary>
@@ -159,19 +176,19 @@ public class StartPanel : MonoBehaviour
     {
         if (objectives == null || objectives.Count == 0)
             return "";
-        
+
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         sb.Append("Collect ");
-        
+
         for (int i = 0; i < objectives.Count; i++)
         {
             QuestObjective obj = objectives[i];
-            
+
             if (i > 0)
             {
                 sb.Append(" , ");
             }
-            
+
             if (obj.requiredAmount == 1)
             {
                 sb.Append("1 item");
@@ -181,10 +198,10 @@ public class StartPanel : MonoBehaviour
                 sb.Append($"{obj.requiredAmount} items");
             }
         }
-        
+
         return sb.ToString();
     }
-    
+
     /// <summary>
     /// Format thời gian từ giây sang định dạng "min:ss"
     /// </summary>
@@ -193,18 +210,5 @@ public class StartPanel : MonoBehaviour
         int minutes = Mathf.FloorToInt(seconds / 60f);
         int secs = Mathf.FloorToInt(seconds % 60f);
         return string.Format("{0}:{1:00}", minutes, secs);
-    }
-
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public void OnStartButtonClicked()
-    {
-        GameCommonUtils.LoadScene("Level" + currentLevelData.level);
-        UIManager.Instance.ShowGamePlayPanel(true);
-        gameObject.SetActive(false);
-        UIManager.Instance.ShowHomePanel(false);
     }
 }

@@ -6,6 +6,8 @@ public class GUIPanel : MonoBehaviour
     public static GUIPanel Instance { get; private set; }
     public TextMeshProUGUI timeText;
 
+    public QuestInfo questInfo;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -26,5 +28,10 @@ public class GUIPanel : MonoBehaviour
     public void OnSettingButtonClicked() {
         UIManager.Instance.ShowSettingPanel(true);
         Time.timeScale = 0f;
+    }
+
+    public void ShowQuestInfo(bool isShow) {
+        Time.timeScale = 0f;
+        questInfo.gameObject.SetActive(isShow);
     }
 }
