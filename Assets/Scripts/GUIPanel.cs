@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-
+using UnityEngine.UI;
 public class GUIPanel : MonoBehaviour
 {
     public static GUIPanel Instance { get; private set; }
@@ -21,5 +21,10 @@ public class GUIPanel : MonoBehaviour
         {
             timeText.text = time;
         }
+    }
+
+    public void OnSettingButtonClicked() {
+        UIManager.Instance.ShowSettingPanel(true);
+        Time.timeScale = 0f;
     }
 }

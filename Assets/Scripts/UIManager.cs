@@ -17,6 +17,8 @@ public class UIManager : MonoBehaviour
 
     public NoticePanel noticePanel;
 
+    public SettingPanel settingPanel;
+
     private void Awake()
     {
         if (Instance == null)
@@ -71,5 +73,13 @@ public class UIManager : MonoBehaviour
         introPanel.SetActive(true);
         homePanel.gameObject.SetActive(false);
         noticePanel.gameObject.SetActive(false);
+        settingPanel.gameObject.SetActive(false);
+    }
+
+    public void ShowSettingPanel(bool isShow) {
+        if (settingPanel != null)
+        {
+            settingPanel.gameObject.SetActive(isShow);
+        }
     }
 }

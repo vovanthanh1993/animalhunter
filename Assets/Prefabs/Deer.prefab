@@ -2571,8 +2571,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runSpeed: 5
-  runDistance: 8
-  detectionDistance: 3
+  runDistance: 20
+  detectionDistance: 10
   checkInterval: 0.1
 --- !u!1 &8769110197511400936
 GameObject:
