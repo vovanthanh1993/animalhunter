@@ -262,52 +262,13 @@ public class PlayerController : MonoBehaviour
 
     private void SpawnArrow()
     {
-        if (arrowPrefab == null)
-        {
-            Debug.LogWarning("PlayerController: Arrow prefab is not assigned!");
-            return;
-        }
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width/2, Screen.height/2, 0));
+        Vector3 shootDir = ray.direction.normalized;
 
-        // Xác định vị trí spawn arrow
-        Vector3 spawnPosition = arrowSpawnPoint != null ? arrowSpawnPoint.position : transform.position;
+        GameObject arrow = Instantiate(arrowPrefab, arrowSpawnPoint.position, Quaternion.LookRotation(shootDir));
 
-        Vector3 shootDirection = CalculateShootDirection(spawnPosition);
-
-        // Tạo arrow
-        GameObject arrow = Instantiate(arrowPrefab, spawnPosition, Quaternion.identity);
-
-        // Gửi hướng cho mũi tên (arrow sẽ tự quay trong SetDirection)
-        Arrow arrowComponent = arrow.GetComponent<Arrow>();
-        if (arrowComponent != null)
-        {
-            arrowComponent.SetDirection(shootDirection);
-        }
-        else
-        {
-            Debug.LogWarning("PlayerController: Arrow prefab doesn't have Arrow component!");
-        }
-    }
-
-    private Vector3 CalculateShootDirection(Vector3 spawnPosition)
-    {
-        if (Camera.main == null)
-        {
-            return transform.forward;
-        }
-
-        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
-        Vector3 targetPoint;
-
-        if (Physics.Raycast(ray, out RaycastHit hit, cameraAimRayDistance, cameraAimLayerMask))
-        {
-            targetPoint = hit.point;   // điểm trúng
-        }
-        else
-        {
-            targetPoint = ray.GetPoint(cameraAimRayDistance); // nếu không trúng gì
-        }
-
-        return (targetPoint - spawnPosition).normalized;
+        // gán direction cho script ArrowMover
+        arrow.GetComponent<Arrow>().direction = shootDir;
     }
 
     #endregion

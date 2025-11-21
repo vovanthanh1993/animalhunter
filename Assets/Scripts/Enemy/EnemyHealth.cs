@@ -103,7 +103,7 @@ public class EnemyHealth : MonoBehaviour
     private IEnumerator DestroyAfterDelay()
     {
         yield return new WaitForSeconds(dieDelay);
-        Destroy(gameObject);
         QuestManager.Instance.OnEnemyKilled(enemyId);
+        Destroy(gameObject);
     }
 }
